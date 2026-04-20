@@ -1,0 +1,2147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配载业务 - 模块</title>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            background-color: #f0f2f5;
+            overflow: hidden;
+            color: #333;
+        }
+
+        /* 一级导航栏 */
+        .primary-nav {
+            width: 70px;
+            min-width: 70px;
+            background-color: #34415C;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 10px;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 10;
+        }
+
+        .primary-nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .primary-nav {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .logo-container {
+            width: 40px;
+            height: 40px;
+            background-color: #fff;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #f66a4f;
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+        }
+
+        .nav-item {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 0;
+            color: #A3AFCA;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            background-color: #263045;
+            color: #fff;
+            border-left: 3px solid #6385FF;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        /* 二级导航栏 */
+        .secondary-nav {
+            width: 240px;
+            min-width: 240px;
+            background-color: #ffffff;
+            height: 100%;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+            border-right: 1px solid #ebedf0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            font-size: 13px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .secondary-nav.collapsed {
+            margin-left: -240px;
+        }
+
+        .secondary-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .secondary-nav::-webkit-scrollbar-thumb {
+            background-color: #dfe3e8;
+            border-radius: 3px;
+        }
+
+        .menu-group {
+            padding: 14px 16px 4px 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .menu-group:last-child {
+            border-bottom: none;
+        }
+
+        .group-title {
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .group-title i {
+            margin-right: 8px;
+            font-size: 16px;
+            color: #3f51b5;
+        }
+
+        .menu-items {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 12px;
+            padding-bottom: 10px;
+            padding-left: 24px;
+        }
+
+        .menu-sub-item {
+            color: #666;
+            cursor: pointer;
+            padding: 6px 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .menu-sub-item:hover {
+            color: #3f51b5;
+            background-color: #f5f7fa;
+        }
+
+        .menu-sub-item.active {
+            color: #3f51b5;
+            background-color: #eef1fe;
+            font-weight: 500;
+        }
+
+        .menu-sub-item.new-node {
+            color: #2F61E0;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .menu-sub-item.new-node::after {
+            content: '';
+            position: absolute;
+            top: 6px;
+            right: 0px;
+            width: 4px;
+            height: 4px;
+            background-color: #ed4014;
+            border-radius: 50%;
+        }
+
+        /* 内容区域 */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: #F3F4F6;
+        }
+
+        .page-container {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .page-container.active {
+            display: flex;
+        }
+
+        .top-header {
+            height: 48px;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid #ebedf0;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            z-index: 5;
+            flex-shrink: 0;
+        }
+
+        .toggle-menu-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #666;
+            margin-right: 16px;
+            padding: 4px;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+
+        .toggle-menu-btn:hover {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .breadcrumb {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* 业务面板与 Tabs */
+        .main-panel {
+            flex-shrink: 0;
+            margin: 16px;
+            margin-bottom: 8px;
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .tabs-bar {
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid #ebedf0;
+            overflow-x: auto;
+            white-space: nowrap;
+            height: 44px;
+            min-height: 44px;
+        }
+
+        .tabs-bar::-webkit-scrollbar {
+            height: 0;
+        }
+
+        .tab-icon {
+            margin-right: 12px;
+            color: #515a6e;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .tab-item {
+            padding: 12px 8px;
+            margin: 0 8px;
+            font-size: 12px;
+            color: #515a6e;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tab-item:hover {
+            color: #2d8cf0;
+        }
+
+        .tab-item.active {
+            color: #2d8cf0;
+            font-weight: 500;
+        }
+
+        .tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #2d8cf0;
+        }
+
+        .tab-divider {
+            width: 1px;
+            height: 14px;
+            background-color: #dcdee2;
+            margin: 0 4px;
+        }
+
+        /* 工具栏 */
+        .toolbar-area {
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-control {
+            border: 1px solid #dcdee2;
+            border-radius: 4px;
+            height: 32px;
+            padding: 0 8px;
+            font-size: 12px;
+            color: #333;
+            outline: none;
+            transition: border 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            border-color: #2d8cf0;
+        }
+
+        .form-control:disabled {
+            background-color: #f5f7fa;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .input-grp {
+            display: flex;
+            align-items: center;
+            border: 1px solid #dcdee2;
+            border-radius: 4px;
+            overflow: hidden;
+            background: #fafbfc;
+        }
+
+        .input-grp>.form-control {
+            border: none;
+            border-radius: 0;
+        }
+
+        .input-grp>.split-line {
+            width: 1px;
+            background: #dcdee2;
+            height: 16px;
+            margin: 0 4px;
+        }
+
+        .select-label {
+            padding: 0 8px;
+            font-size: 12px;
+            color: #515a6e;
+            background: #fafbfc;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn {
+            height: 32px;
+            padding: 0 12px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background-color: #2d8cf0;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background-color: #57a3f3;
+        }
+
+        .btn-primary:disabled {
+            background-color: #a0cfff;
+            cursor: not-allowed;
+        }
+
+        .btn-default {
+            background-color: #fff;
+            border-color: #dcdee2;
+            color: #515a6e;
+        }
+
+        .btn-default:hover {
+            color: #2d8cf0;
+            border-color: #2d8cf0;
+        }
+
+        .btn-link {
+            color: #2d8cf0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 0;
+            transition: color 0.2s;
+        }
+
+        .btn-link:hover {
+            color: #57a3f3;
+            text-decoration: underline;
+        }
+
+        .checkbox-wrap {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            color: #515a6e;
+            cursor: pointer;
+            gap: 4px;
+        }
+
+        .checkbox-wrap input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .actions-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* 数据表格 */
+        .table-container {
+            padding: 0 16px 16px 16px;
+            overflow: auto;
+            flex: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            background-color: #f8f8f9;
+            color: #515a6e;
+            font-weight: 500;
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e8eaec;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e8eaec;
+            color: #333;
+        }
+
+        tr:hover td {
+            background-color: #ebf7ff;
+        }
+
+        .empty-data {
+            text-align: center;
+            padding: 60px 0;
+            color: #999;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            color: #e8eaec;
+        }
+
+        /* 特殊选中样式 */
+        .selectable-row {
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .selectable-row.selected {
+            background-color: #e6f7ff !important;
+            box-shadow: inset 0px 0px 0px 1px #2d8cf0;
+            font-weight: 500;
+        }
+
+        .selectable-row.selected td {
+            border-color: transparent;
+        }
+
+        /* 筛选标签块 */
+        .filter-hint {
+            display: none;
+            align-items: center;
+            font-size: 12px;
+            color: #2d8cf0;
+            background: #ebf7ff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+            border: 1px solid #b3d8ff;
+        }
+
+        .filter-hint span {
+            margin-left: 4px;
+            font-weight: 500;
+        }
+
+        /* 模态弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fff;
+            width: 400px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: modalIn 0.2s ease-out;
+        }
+
+        @keyframes modalIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid #ebedf0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .modal-close {
+            cursor: pointer;
+            color: #999;
+            font-size: 16px;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 16px;
+            font-size: 13px;
+        }
+
+        .modal-footer {
+            padding: 12px 16px;
+            border-top: 1px solid #ebedf0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .form-item {
+            margin-bottom: 16px;
+        }
+
+        .form-item-label {
+            margin-bottom: 8px;
+            color: #515a6e;
+        }
+
+        .form-select {
+            width: 100%;
+            height: 32px;
+            border: 1px solid #dcdee2;
+            border-radius: 4px;
+            padding: 0 8px;
+            color: #333;
+            outline: none;
+            font-size: 12px;
+            box-sizing: border-box;
+        }
+
+        /* --- 详情页面专属样式 --- */
+        .detail-section {
+            background: #fff;
+            border-radius: 4px;
+            margin: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-header {
+            padding: 12px 16px;
+            font-weight: 500;
+            color: #17233d;
+            font-size: 14px;
+            position: relative;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-header::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            bottom: 12px;
+            width: 3px;
+            background-color: #2d8cf0;
+        }
+
+        .section-tabs {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 12px;
+        }
+
+        .sec-tab {
+            padding: 4px 12px;
+            font-size: 12px;
+            border: 1px solid #dcdee2;
+            border-radius: 2px;
+            color: #515a6e;
+            cursor: default;
+        }
+
+        .sec-tab.on {
+            border-color: #2d8cf0;
+            color: #2d8cf0;
+            background-color: #f0faff;
+            font-weight: 500;
+        }
+
+        .form-grid {
+            padding: 16px;
+            display: grid;
+            gap: 16px;
+            font-size: 12px;
+        }
+
+        .grid-2col {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .grid-4col {
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 12px 16px;
+        }
+
+        .grid-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .grid-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .grid-label {
+            width: 80px;
+            min-width: 80px;
+            text-align: right;
+            padding-right: 12px;
+            color: #515a6e;
+        }
+
+        .grid-control {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .full-textarea {
+            width: 100%;
+            height: 80px;
+            border: 1px solid #dcdee2;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 12px;
+            background: #f5f7fa;
+            color: #999;
+            resize: none;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 一级导航栏 -->
+    <nav class="primary-nav">
+        <div class="logo-container"><i class="ph-fill ph-cards"></i></div>
+        <a href="#" class="nav-item" onclick="expandNav(this)"><i class="ph ph-house"></i><span>工作台</span></a>
+        <a href="#" class="nav-item" onclick="expandNav(this)"><i class="ph ph-buildings"></i><span>供应链</span></a>
+        <a href="#" class="nav-item active" onclick="expandNav(this)"><i
+                class="ph ph-list-dashes"></i><span>业务</span></a>
+        <a href="#" class="nav-item" onclick="expandNav(this)"><i class="ph ph-warehouse"></i><span>仓库</span></a>
+        <a href="#" class="nav-item" onclick="expandNav(this)"><i class="ph ph-clipboard-text"></i><span>报价</span></a>
+        <a href="#" class="nav-item" onclick="expandNav(this)"><i class="ph ph-user-gear"></i><span>管理</span></a>
+        <a href="#" class="nav-item" onclick="expandNav(this)"><i class="ph ph-calculator"></i><span>结算</span></a>
+        <a href="#" class="nav-item" onclick="expandNav(this)"><i class="ph ph-currency-cny"></i><span>财务</span></a>
+        <a href="#" class="nav-item" onclick="expandNav(this)"><i class="ph ph-chart-bar"></i><span>报表</span></a>
+        <a href="#" class="nav-item" onclick="expandNav(this)"><i class="ph ph-users"></i><span>客商</span></a>
+        <a href="#" class="nav-item" onclick="expandNav(this)"><i class="ph ph-folder-notch"></i><span>档案</span></a>
+        <a href="#" class="nav-item" onclick="expandNav(this)"><i class="ph ph-user"></i><span>用户</span></a>
+        <a href="#" class="nav-item" onclick="expandNav(this)"><i class="ph ph-gear"></i><span>系统</span></a>
+    </nav>
+
+    <!-- 二级导航栏 -->
+    <aside class="secondary-nav" id="secondaryNav">
+        <div class="menu-group">
+            <div class="group-title"><i class="ph ph-boat"></i>海运</div>
+            <div class="menu-items">
+                <div class="menu-sub-item" data-title="海运委托" onclick="handleMenuClick(this)">海运委托</div>
+                <div class="menu-sub-item" data-title="提单管理" onclick="handleMenuClick(this)">提单管理</div>
+                <div class="menu-sub-item" data-title="海运拼箱" onclick="handleMenuClick(this)">海运拼箱</div>
+            </div>
+        </div>
+        <div class="menu-group">
+            <div class="group-title"><i class="ph ph-airplane-tilt"></i>空运</div>
+            <div class="menu-items">
+                <div class="menu-sub-item" data-title="空运委托" onclick="handleMenuClick(this)">空运委托</div>
+            </div>
+        </div>
+        <div class="menu-group">
+            <div class="group-title"><i class="ph ph-train"></i>铁运</div>
+            <div class="menu-items">
+                <div class="menu-sub-item" data-title="铁运委托" onclick="handleMenuClick(this)">铁运委托</div>
+                <div class="menu-sub-item" data-title="铁运拼箱" onclick="handleMenuClick(this)">铁运拼箱</div>
+            </div>
+        </div>
+        <div class="menu-group">
+            <div class="group-title"><i class="ph ph-tote"></i>跨境专线</div>
+            <div class="menu-items">
+                <div class="menu-sub-item" data-title="FBX订单" onclick="handleMenuClick(this)">FBX订单</div>
+                <div class="menu-sub-item" data-title="中转管理" onclick="handleMenuClick(this)">中转管理</div>
+                <div class="menu-sub-item" data-title="俄线订单" onclick="handleMenuClick(this)">俄线订单</div>
+                <div class="menu-sub-item" data-title="合单外配" onclick="handleMenuClick(this)">合单外配</div>
+                <div class="menu-sub-item" data-title="合单报关" onclick="handleMenuClick(this)">合单报关</div>
+            </div>
+        </div>
+        <div class="menu-group">
+            <div class="group-title"><i class="ph ph-truck"></i>陆运</div>
+            <div class="menu-items">
+                <div class="menu-sub-item" data-title="陆运委托" onclick="handleMenuClick(this)">陆运委托</div>
+                <div class="menu-sub-item" data-title="拖车订单" onclick="handleMenuClick(this)">拖车订单</div>
+                <div class="menu-sub-item" data-title="整车/零担" onclick="handleMenuClick(this)">整车/零担</div>
+            </div>
+        </div>
+        <div class="menu-group">
+            <div class="group-title"><i class="ph ph-squares-four"></i>综合</div>
+            <div class="menu-items">
+                <div class="menu-sub-item" data-title="综合委托单" onclick="handleMenuClick(this)">综合委托单</div>
+            </div>
+        </div>
+
+        <div class="menu-group">
+            <div class="group-title"><i class="ph ph-package"></i>配载</div>
+            <div class="menu-items">
+                <div class="menu-sub-item active" data-title="FBX海运拼箱" data-target="page-fbx"
+                    onclick="handleMenuClick(this)">FBX海运拼箱</div>
+                <div class="menu-sub-item" data-title="FBX空运拼板" onclick="handleMenuClick(this)">FBX空运拼板</div>
+                <div class="menu-sub-item" data-title="FBX陆运拼箱" onclick="handleMenuClick(this)">FBX陆运拼箱</div>
+                <div class="menu-sub-item new-node" data-title="港后服务" data-target="page-post-port"
+                    onclick="handleMenuClick(this)">港后服务</div>
+            </div>
+        </div>
+
+        <div class="menu-group">
+            <div class="group-title"><i class="ph ph-map-pin"></i>舱位管理</div>
+            <div class="menu-items">
+                <div class="menu-sub-item" data-title="舱位看板" onclick="handleMenuClick(this)">舱位看板</div>
+                <div class="menu-sub-item" data-title="舱位查询" onclick="handleMenuClick(this)">舱位查询</div>
+            </div>
+        </div>
+        <div class="menu-group">
+            <div class="group-title"><i class="ph ph-gear"></i>设置</div>
+            <div class="menu-items">
+                <div class="menu-sub-item" data-title="日期设置" onclick="handleMenuClick(this)">日期设置</div>
+                <div class="menu-sub-item" data-title="状态模板" onclick="handleMenuClick(this)">状态模板</div>
+                <div class="menu-sub-item" data-title="难度系数" onclick="handleMenuClick(this)">难度系数</div>
+                <div class="menu-sub-item" data-title="业务设置" onclick="handleMenuClick(this)">业务设置</div>
+                <div class="menu-sub-item" data-title="订阅设置" onclick="handleMenuClick(this)">订阅设置</div>
+                <div class="menu-sub-item" data-title="自定义轨迹" onclick="handleMenuClick(this)">自定义轨迹</div>
+                <div class="menu-sub-item" data-title="API推送规则" onclick="handleMenuClick(this)">API推送规则</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 内容区 -->
+    <main class="content-area">
+        <header class="top-header">
+            <button class="toggle-menu-btn" onclick="toggleNav()" title="展开/收起导航"><i class="ph ph-list"></i></button>
+            <div class="breadcrumb" id="pageTitle">配载业务 / FBX海运拼箱</div>
+        </header>
+
+        <!-- ======================= 页面一：FBX海运拼箱 ======================= -->
+        <div id="page-fbx" class="page-container active">
+            <div class="main-panel">
+                <div class="tabs-bar">
+                    <i class="ph ph-faders tab-icon"></i>
+                    <div class="tab-item active">全部</div>
+                    <div class="tab-divider"></div>
+                    <div class="tab-item">待订舱(378)</div>
+                    <div class="tab-item">待派车(81)</div>
+                    <div class="tab-divider"></div>
+                    <div class="tab-item">取消(10)</div>
+                </div>
+
+                <div class="toolbar-area">
+                    <div class="filter-group">
+                        <div class="input-grp">
+                            <div class="select-label">工作单日期 <i class="ph ph-caret-down" style="margin-left:4px"></i>
+                            </div>
+                            <div class="split-line"></div>
+                            <input type="text" class="form-control" style="width: 100px; background: #fff;"
+                                placeholder="开始日期">
+                            <input type="text" class="form-control" style="width: 100px; background: #fff;"
+                                placeholder="结束日期">
+                        </div>
+                        <div class="input-grp">
+                            <div class="select-label">关键字 <i class="ph ph-caret-down" style="margin-left:4px"></i></div>
+                            <div class="split-line"></div>
+                            <input type="text" class="form-control" style="width: 180px; background: #fff;"
+                                placeholder="箱号/订单号/AES">
+                        </div>
+                        <button class="btn btn-primary"><i class="ph ph-magnifying-glass"></i> 查询</button>
+                    </div>
+                    <div class="actions-group">
+                        <button class="btn btn-default">导出清单</button>
+                        <button class="btn btn-default" onclick="openPushModal()">推送港后服务</button>
+                        <button class="btn btn-primary">新建海运配载单</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="fbxTable">
+                        <thead>
+                            <tr>
+                                <th width="5%"><input type="checkbox" id="checkAllFbx" onclick="toggleAllChecks(this)">
+                                </th>
+                                <th width="5%">序号</th>
+                                <th width="25%">配载单号</th>
+                                <th width="25%">工作单日期</th>
+                                <th width="40%">箱型箱号</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td>1</td>
+                                <td class="c-no">PZ202604160001</td>
+                                <td class="c-date">2026-04-16</td>
+                                <td class="c-box">40HQ / TLLU4189032</td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td>2</td>
+                                <td class="c-no">PZ202604160002</td>
+                                <td class="c-date">2026-04-15</td>
+                                <td class="c-box">20GP / CAIU2837190</td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td>3</td>
+                                <td class="c-no">PZ202604160003</td>
+                                <td class="c-date">2026-04-14</td>
+                                <td class="c-box">40GP / MSCU2845612</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================= 页面二：港后服务 ======================= -->
+        <div id="page-post-port" class="page-container">
+            <!-- 港后服务 - 上模块 -->
+            <div class="main-panel" style="margin-bottom: 8px;">
+                <div class="tabs-bar">
+                    <div class="tab-item active">全部</div>
+                    <div class="tab-item">待到港</div>
+                    <div class="tab-item">待清关</div>
+                    <div class="tab-item">待提重</div>
+                    <div class="tab-item">待入海外仓</div>
+                    <div class="tab-item">待派送</div>
+                    <div class="tab-item">派送中</div>
+                    <div class="tab-item">已签收</div>
+                </div>
+                <div class="toolbar-area" style="padding-top: 16px;">
+                    <div class="filter-group">
+                        <div class="input-grp">
+                            <div class="select-label">配载单号 <i class="ph ph-caret-down" style="margin-left:4px"></i>
+                            </div>
+                            <div class="split-line"></div>
+                            <input type="text" class="form-control" style="width: 150px; background: #fff;"
+                                placeholder="请输入">
+                        </div>
+                        <div class="input-grp">
+                            <div class="select-label">工作单日期 <i class="ph ph-caret-down" style="margin-left:4px"></i>
+                            </div>
+                            <div class="split-line"></div>
+                            <input type="date" class="form-control" style="width: 130px; background: #fff;"
+                                placeholder="开始日期">
+                            <span style="color:#ccc; margin:0 4px;">-</span>
+                            <input type="date" class="form-control" style="width: 130px; background: #fff;"
+                                placeholder="结束日期">
+                        </div>
+                        <button class="btn btn-primary"><i class="ph ph-magnifying-glass"></i> 查询</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table id="postPortTableTop">
+                        <thead>
+                            <tr>
+                                <th>配载单号</th>
+                                <th>工作单日期</th>
+                                <th>箱型箱号</th>
+                                <th width="10%">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="emptyTop">
+                                <td colspan="4" class="empty-data">暂无港后配载推送数据</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 港后服务 - 下模块 -->
+            <div class="main-panel" style="margin-top: 8px; margin-bottom: 16px;">
+                <div class="tabs-bar">
+                    <div class="tab-item active" onclick="switchOrdersTab(this, null)">全部</div>
+                    <div class="tab-item" onclick="switchOrdersTab(this, '待签收')">待签收</div>
+                    <div class="tab-item" onclick="switchOrdersTab(this, '已签收')">已签收</div>
+                    <div class="tab-divider"></div>
+                    <!-- 动态显示的关联指示标签 -->
+                    <div class="filter-hint" id="currentPzFilter">
+                        相关配载单: <span id="currentPzName"></span>
+                        <i class="ph ph-x" style="cursor:pointer; margin-left:4px;" onclick="clearPzFilter()"></i>
+                    </div>
+                </div>
+
+                <!-- 下模块筛选工具栏 -->
+                <div class="toolbar-area"
+                    style="padding: 12px 16px 12px 16px; border-bottom: 1px solid #ebedf0; background-color:#FAFAFA;">
+                    <div class="filter-group" style="flex-wrap: wrap; gap: 12px; margin-bottom: 0;">
+                        <div class="input-grp">
+                            <div class="select-label" style="background:#f7f9fa; cursor:default;">工作单号 <i
+                                    class="ph ph-caret-down" style="margin-left:4px; color:#ccc;"></i></div>
+                            <div class="split-line"></div>
+                            <input type="text" class="form-control" id="subFilterOrderNo"
+                                style="width: 140px; background: #fff;" placeholder="请输入">
+                        </div>
+                        <div class="input-grp">
+                            <div class="select-label" style="background:#f7f9fa; cursor:default;">工作单日期 <i
+                                    class="ph ph-caret-down" style="margin-left:4px; color:#ccc;"></i></div>
+                            <div class="split-line"></div>
+                            <input type="date" class="form-control" id="subFilterDateStart"
+                                style="width: 120px; background: #fff;">
+                            <span style="color:#ccc; margin:0 4px;">-</span>
+                            <input type="date" class="form-control" id="subFilterDateEnd"
+                                style="width: 120px; background: #fff;">
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px; margin-left:8px;">
+                            <span style="font-size:13px; color:#666;">收货渠道</span>
+                            <select id="subFilterChannel" class="form-select" style="width: 120px;">
+                                <option value="">全部</option>
+                                <option value="海运双清">海运双清</option>
+                                <option value="海运自税">海运自税</option>
+                                <option value="海运拼箱">海运拼箱</option>
+                                <option value="空运直送">空运直送</option>
+                                <option value="国际快递">国际快递</option>
+                            </select>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:13px; color:#666;">地址类型</span>
+                            <select id="subFilterAddrType" class="form-select" style="width: 110px;">
+                                <option value="">全部</option>
+                                <option value="FBA">FBA</option>
+                                <option value="FBX">FBX</option>
+                                <option value="私人地址">私人地址</option>
+                                <option value="商业地址">商业地址</option>
+                                <option value="客户自提">客户自提</option>
+                            </select>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:13px; color:#666;">派送类型</span>
+                            <select id="subFilterDispatch" class="form-select" style="width: 110px;">
+                                <option value="">全部</option>
+                                <option value="卡派">卡派</option>
+                                <option value="快递派">快递派</option>
+                                <option value="自提">自提</option>
+                            </select>
+                        </div>
+
+                        <div style="display:flex; gap:8px; margin-left:auto;">
+                            <button class="btn btn-primary" onclick="applySubFilters()"><i
+                                    class="ph ph-magnifying-glass"></i> 查询</button>
+                            <button class="btn" style="background:#fff; border:1px solid #ddd; color:#666;"
+                                onclick="resetSubFilters()">重置</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="postPortTableBottom">
+                        <thead>
+                            <tr>
+                                <th width="40"><input type="checkbox" id="checkAllOrders"
+                                        onclick="toggleAllOrders(this)"></th>
+                                <th width="50">序号</th>
+                                <th>工作单号</th>
+                                <th>工作单日期</th>
+                                <th>柜号</th>
+                                <th>收货渠道</th>
+                                <th>渠道时效</th>
+                                <th>离港至今天数</th>
+                                <th>是否HOLD货</th>
+                                <th>地址类型</th>
+                                <th>仓库</th>
+                                <th>派送类型</th>
+                                <th>收货地址</th>
+                                <th>状态</th>
+                                <th width="10%">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTbody">
+                            <!-- JS 会在此处渲染数据 -->
+                            <tr>
+                                <td colspan="15" class="empty-data" style="white-space: nowrap;">暂无工作单数据</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 列表外左下角批量操作 -->
+                <div id="batchSignOffContainer" style="padding: 12px 16px; display:flex;">
+                    <button class="btn btn-primary" onclick="batchSignOff()">批量签收</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================= 页面三：订单详情 (不可修改形态) ======================= -->
+        <div id="page-order-detail" class="page-container">
+            <!-- 派送信息块 -->
+            <div class="detail-section">
+                <div class="section-header">
+                    <div style="display:flex; align-items:center;">
+                        派送信息
+                        <div class="section-tabs">
+                            <div class="sec-tab">FBA</div>
+                            <div class="sec-tab on">FBX</div>
+                            <div class="sec-tab">商业地址</div>
+                            <div class="sec-tab">客户自提</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-default" disabled>复制</button>
+                </div>
+                <!-- 静态网格表单 -->
+                <div class="form-grid grid-2col">
+                    <!-- 左侧4列信息阵列 (平台,仓库的等) -->
+                    <div class="grid-4col" style="display: grid;">
+                        <div class="grid-item">
+                            <span class="grid-label">平台</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="FBX">
+                            </div>
+                        </div>
+                        <div class="grid-item">
+                            <span class="grid-label">国家/地区</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="美国"></div>
+                        </div>
+                        <div class="grid-item">
+                            <span class="grid-label">邮编</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="90001">
+                            </div>
+                        </div>
+                        <!-- 空格对齐处理可以加空 div，这里为了示范省略 -->
+                        <div style="grid-column: span 1;"></div>
+
+                        <div class="grid-item">
+                            <span class="grid-label">仓库</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="美西1号大仓">
+                            </div>
+                        </div>
+                        <div class="grid-item">
+                            <span class="grid-label">省/州/市</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="CA"></div>
+                        </div>
+                        <div class="grid-item" style="grid-column: span 2;">
+                            <span class="grid-label">地址1</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="1234 Logistics Blvd"></div>
+                        </div>
+
+                        <div class="grid-item">
+                            <span class="grid-label">建柜时间</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="2026-04-16"></div>
+                        </div>
+                        <div class="grid-item">
+                            <span class="grid-label">区/县</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="Los Angeles"></div>
+                        </div>
+                        <div class="grid-item" style="grid-column: span 2;">
+                            <span class="grid-label">地址2</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="Dock 5">
+                            </div>
+                        </div>
+
+                        <div class="grid-item">
+                            <span class="grid-label">通知税号1</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="TAX12345678"></div>
+                        </div>
+                        <div class="grid-item">
+                            <span class="grid-label">通知税号2</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="TAX87654321"></div>
+                        </div>
+                        <div class="grid-item" style="grid-column: span 2;">
+                            <span class="grid-label">地址3</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value=""></div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧内容 (备注等) -->
+                    <div class="grid-row" style="padding-left: 20px; border-left: 1px solid #f0f0f0;">
+                        <div class="grid-item" style="align-items: flex-start;">
+                            <span class="grid-label" style="width:70px;">派送备注</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="无特殊要求，需提前预约。"></div>
+                        </div>
+                        <div class="grid-item" style="align-items: flex-start;">
+                            <span class="grid-label" style="width:70px;">提单收货人</span>
+                            <div class="grid-control">
+                                <textarea class="full-textarea"
+                                    disabled>US FBX WAREHOUSE CENTER&#10;ATTN: RECEIVING DEPT</textarea>
+                            </div>
+                        </div>
+                        <div class="grid-item">
+                            <span class="grid-label" style="width:70px;">签名服务</span>
+                            <div class="grid-control"><input type="checkbox" disabled checked></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 装箱清单块 -->
+            <div class="detail-section">
+                <div class="section-header">
+                    <div>装箱清单</div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn btn-primary" disabled>批量新增</button>
+                        <button class="btn btn-default" disabled>批量导入</button>
+                    </div>
+                </div>
+                <div style="width:100%; overflow-x: auto;">
+                    <table style="min-width: 1400px;">
+                        <thead>
+                            <tr style="font-size:12px;">
+                                <th style="width:40px;">#</th>
+                                <th>* 箱型</th>
+                                <th>箱号</th>
+                                <th>对号</th>
+                                <th>限重类型</th>
+                                <th>订舱号</th>
+                                <th>货物长宽高(CM)</th>
+                                <th>标记与号码</th>
+                                <th>件数</th>
+                                <th>包装</th>
+                                <th>毛重(KGS)</th>
+                                <th>体积(CBM)</th>
+                                <th>净重(KGS)</th>
+                                <th>参考号</th>
+                                <th>对号2</th>
+                                <th>对号3</th>
+                                <th>空箱重量(KGS)</th>
+                                <th>VGM(KGS)</th>
+                                <th>对箱单位1</th>
+                                <th>对箱单位2</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="21">
+                                    <div class="empty-data" style="padding: 40px 0;">
+                                        <i class="ph ph-magnifying-glass empty-icon"></i>
+                                        <div style="color:#c5c8ce;">暂无数据</div>
+                                        <button class="btn btn-primary" disabled style="margin-top:8px;">+ 新增</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 海关信息块 -->
+            <div class="detail-section" style="margin-bottom: 24px;">
+                <div class="section-header">海关信息</div>
+                <div class="form-grid grid-4col">
+                    <div class="grid-item">
+                        <span class="grid-label" style="width:60px;">清关代理</span>
+                        <div class="grid-control">
+                            <select class="form-select">
+                                <option value="">请选择清关代理</option>
+                                <option value="1">全球通报关代理</option>
+                                <option value="2">美联关务代理</option>
+                                <option value="3">迅捷清关事务所</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label" style="width:80px; white-space:nowrap;">开始清关时间</span>
+                        <div class="grid-control"><input type="datetime-local" class="form-control"></div>
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label" style="width:80px; white-space:nowrap;">清关查验时间</span>
+                        <div class="grid-control"><input type="datetime-local" class="form-control"></div>
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label" style="width:80px; white-space:nowrap;">清关放行时间</span>
+                        <div class="grid-control"><input type="datetime-local" class="form-control"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ======================= 页面四：主配载详细 (图二图三衍生) ======================= -->
+        <div id="page-pz-detail" class="page-container" style="background:#fff;">
+            <!-- 复杂的Tabs区域 -->
+            <div class="tabs-bar" style="border-bottom: 2px solid #2d8cf0; padding-top:8px;">
+                <div class="tab-item active" onclick="switchPzTab('basic')">基本信息</div>
+                <div class="tab-item" onclick="switchPzTab('orders')">配载订单</div>
+                <div class="tab-item" id="tab-truck" onclick="switchPzTab('truck')" style="display:none;">拖车</div>
+            </div>
+
+            <!-- 基本信息 Content -->
+            <div id="pz-tab-basic" style="padding: 16px; background:#f5f7fa;">
+                <div class="detail-section" style="margin:0 0 16px 0;">
+                    <div class="section-header">
+                        <div style="display:flex; align-items:center;">
+                            基本信息
+                            <div class="section-tabs" style="margin: 0 16px;">
+                                <label class="checkbox-wrap" style="margin-right:8px;"><input type="checkbox"
+                                        id="disp-qg" checked> 清关服务</label>
+                                <label class="checkbox-wrap" style="margin-right:8px;"><input type="checkbox"
+                                        id="disp-tg" checked onchange="toggleTruckTab()"> 提柜服务</label>
+                                <label class="checkbox-wrap" style="margin-right:8px;"><input type="checkbox"
+                                        id="disp-cp" checked> 拆派服务</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-grid grid-4col">
+                        <div class="grid-item"><span class="grid-label">客户</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="运物云国内总公司">
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">客服</span>
+                            <div class="grid-control">
+                                <select class="form-select">
+                                    <option value="">请选择客服</option>
+                                    <option value="1">张晓明</option>
+                                    <option value="2">李雪儿</option>
+                                    <option value="3">陈宇</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">客服部门</span>
+                            <div class="grid-control">
+                                <select class="form-select">
+                                    <option value="">请选择</option>
+                                    <option value="1">客服一部</option>
+                                    <option value="2">客服二部</option>
+                                    <option value="3">客服三部</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-item"></div>
+
+                        <div class="grid-item"><span class="grid-label">操作员</span>
+                            <div class="grid-control">
+                                <select class="form-select">
+                                    <option value="">请选择操作员</option>
+                                    <option value="1">王强</option>
+                                    <option value="2">林伟</option>
+                                    <option value="3">赵敏</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">操作部门</span>
+                            <div class="grid-control">
+                                <select class="form-select">
+                                    <option value="">请选择</option>
+                                    <option value="1">操作一部</option>
+                                    <option value="2">操作二部</option>
+                                    <option value="3">操作三部</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">业务员</span>
+                            <div class="grid-control">
+                                <select class="form-select">
+                                    <option value="">请选择业务员</option>
+                                    <option value="1">张宏达</option>
+                                    <option value="2">刘莉</option>
+                                    <option value="3">黄浩</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">业务部门</span>
+                            <div class="grid-control">
+                                <select class="form-select">
+                                    <option value="">请选择</option>
+                                    <option value="1">业务一部</option>
+                                    <option value="2">业务二部</option>
+                                    <option value="3">业务三部</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid-item"><span class="grid-label">货物类别</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="普货"></div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">工作单日期</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="2026-04-15"></div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">备注</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value=""></div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">参考号</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value=""></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section" style="margin:0 0 16px 0;">
+                    <div class="section-header">船期信息 <span
+                            style="background:#2d8cf0; color:#fff; font-size:10px; padding:2px 6px; border-radius:2px; margin-left:8px;">SO智能识别</span>
+                    </div>
+                    <div class="form-grid grid-4col">
+                        <div class="grid-item"><span class="grid-label">订舱号</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="BK2024581">
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">收货地</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="SHENZHEN">
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">订舱日期</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="2026-04-01">
+                            </div>
+                        </div>
+                        <div class="grid-item" style="grid-row: span 2;"><span class="grid-label">订舱备注</span>
+                            <div class="grid-control"><textarea class="full-textarea" disabled></textarea></div>
+                        </div>
+
+                        <div class="grid-item"><span class="grid-label">订舱代理</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="代理A">
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">装港</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="YANTIAN">
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">截关日</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="2026-04-10">
+                            </div>
+                        </div>
+
+                        <div class="grid-item"><span class="grid-label">船名航次</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="COSCO SHIPPING"></div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">目的港</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="LOS ANGELES">
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">截柜日</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="2026-04-09">
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">ETD</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="2026-04-12">
+                            </div>
+                        </div>
+
+                        <div class="grid-item"><span class="grid-label">船公司</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="COSCO">
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">柜号</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="CXIU392817">
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">截VGM</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="2026-04-09">
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">ETA</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="2026-04-26">
+                            </div>
+                        </div>
+
+                        <div class="grid-item"><span class="grid-label">合约号</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="CT553311">
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">箱型</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="40'HQ">
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">截文件</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="2026-04-08">
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">ATD</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value=""></div>
+                        </div>
+
+                        <div class="grid-item" style="gap:12px;">
+                            <span class="grid-label">放货方式</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="电放"></div>
+                            <label class="checkbox-wrap"><input type="checkbox" disabled> 电放背书</label>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">封条号</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="SEAL9833">
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">Pin</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value=""></div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">ATA</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value=""></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section" style="margin:0 0 16px 0;">
+                    <div class="section-header">海关信息</div>
+                    <div class="form-grid grid-4col">
+                        <div class="grid-item"><span class="grid-label">清关代理</span>
+                            <div class="grid-control">
+                                <select class="form-select">
+                                    <option value="">请选择清关代理</option>
+                                    <option value="1">全球通报关代理</option>
+                                    <option value="2">美联关务代理</option>
+                                    <option value="3">迅捷清关事务所</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label" style="white-space:nowrap;">开始清关时间</span>
+                            <div class="grid-control"><input type="datetime-local" class="form-control"></div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label" style="white-space:nowrap;">清关查验时间</span>
+                            <div class="grid-control"><input type="datetime-local" class="form-control"></div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label" style="white-space:nowrap;">清关放行时间</span>
+                            <div class="grid-control"><input type="datetime-local" class="form-control"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 唯一处于可编辑状态的部分 -->
+                <div class="detail-section" style="margin:0 0 16px 0;">
+                    <div class="section-header" style="color:#2d8cf0;">尾程服务 (部分可编辑)</div>
+                    <div class="form-grid grid-4col">
+                        <div class="grid-item"><span class="grid-label">供应商</span>
+                            <div class="grid-control">
+                                <select class="form-select">
+                                    <option value="">请选择供应商</option>
+                                    <option value="1">美西联合货运服务公司</option>
+                                    <option value="2">纽约环球海外清关署</option>
+                                    <option value="3">芝加哥顺畅派送代理</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">拆柜仓库</span>
+                            <div class="grid-control">
+                                <select class="form-select">
+                                    <option value="">请选择美国海外仓</option>
+                                    <option value="WH1">洛杉矶长滩港一号仓库</option>
+                                    <option value="WH2">纽约布鲁克林散货集运仓</option>
+                                    <option value="WH3">休斯顿港务通用分拨仓</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">提重时间</span>
+                            <div class="grid-control"><input type="date" class="form-control"></div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label" style="white-space: nowrap;">入海外仓时间</span>
+                            <div class="grid-control"><input type="date" class="form-control"></div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">拆柜时间</span>
+                            <div class="grid-control"><input type="date" class="form-control"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 配载订单 Content -->
+            <div id="pz-tab-orders" style="display:none; padding:16px;">
+                <div class="table-container" style="background:#fff;">
+                    <table style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th width="50">序号</th>
+                                <th>工作单号</th>
+                                <th>工作单日期</th>
+                                <th>柜号</th>
+                                <th>收货渠道</th>
+                                <th>渠道时效</th>
+                                <th>离港至今天数</th>
+                                <th>是否HOLD货</th>
+                                <th>地址类型</th>
+                                <th>仓库</th>
+                                <th>派送类型</th>
+                                <th>收货地址</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pzSubOrdersTbody">
+                            <!-- 动态注入当前配载单对应的订单数据 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 拖车 Content -->
+            <div id="pz-tab-truck" style="display:none; padding: 16px; background:#f5f7fa;">
+                <div class="detail-section" style="margin:0 0 16px 0;">
+                    <div class="section-header">拖车信息</div>
+                    <div class="form-grid" style="grid-template-columns: repeat(5, 1fr); gap: 16px;">
+                        <div class="grid-item">
+                            <span class="grid-label" style="white-space:nowrap;"><span
+                                    style="color:red; margin-right:4px;">*</span>拖车公司</span>
+                            <div class="grid-control">
+                                <select class="form-select">
+                                    <option value="">请选择</option>
+                                    <option value="swift">Swift Transportation</option>
+                                    <option value="jbhunt">J.B. Hunt Transport</option>
+                                    <option value="schneider">Schneider National</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">车牌</span>
+                            <div class="grid-control"><input type="text" class="form-control" placeholder="请输入车牌"></div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">提柜码头</span>
+                            <div class="grid-control">
+                                <select class="form-select">
+                                    <option value="">请选择</option>
+                                    <option value="LAX">洛杉矶港 (Port of LA)</option>
+                                    <option value="LGB">长滩港 (Port of Long Beach)</option>
+                                    <option value="NY">纽约新泽西港 (NY & NJ)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">还柜码头</span>
+                            <div class="grid-control">
+                                <select class="form-select">
+                                    <option value="">请选择</option>
+                                    <option value="LAX">洛杉矶港 (Port of LA)</option>
+                                    <option value="LGB">长滩港 (Port of Long Beach)</option>
+                                    <option value="NY">纽约新泽西港 (NY & NJ)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">备注</span>
+                            <div class="grid-control"><input type="text" class="form-control" placeholder="请输入备注"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section" style="margin:0 0 16px 0;">
+                    <div class="section-header">应付拖车费用</div>
+                    <table style="width: 100%;">
+                        <thead>
+                            <tr style="font-size:12px;">
+                                <th>#</th>
+                                <th><span style="color:red">*</span> 费用名称</th>
+                                <th>单价</th>
+                                <th>数量</th>
+                                <th>单位</th>
+                                <th><span style="color:red">*</span> 金额</th>
+                                <th>单价含税</th>
+                                <th>税率</th>
+                                <th>币制</th>
+                                <th>参考号</th>
+                            </tr>
+                        </thead>
+                    </table>
+                    <div class="empty-data" style="padding: 30px 0;">
+                        <i class="ph ph-magnifying-glass empty-icon"></i>
+                        <div style="color:#c5c8ce;">暂无数据</div>
+                        <button class="btn btn-primary" style="margin-top:8px;">+ 新增</button>
+                    </div>
+                </div>
+
+                <div class="detail-section" style="padding:16px;">
+                    <div style="margin-bottom:8px; font-weight:500;">应付拖车费用合计 <i class="ph ph-arrows-clockwise"
+                            style="color:#2d8cf0; cursor:pointer;"></i></div>
+                    <input type="text" class="form-control" style="width:100%;" disabled placeholder="0.00">
+                </div>
+            </div>
+
+            <!-- 其他留空 -->
+            <div id="pz-tab-others" style="display:none; padding:40px; text-align:center; color:#999;">页面内容开发中...</div>
+        </div>
+
+    </main>
+
+    <!-- 推送港后服务弹窗 -->
+    <div class="modal-overlay" id="pushModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>推送港后服务</span>
+                <i class="ph ph-x modal-close" onclick="closePushModal()"></i>
+            </div>
+            <div class="modal-body">
+                <div class="form-item">
+                    <div class="form-item-label">推送的服务商</div>
+                    <!-- 3 个虚拟服务商选项 -->
+                    <select class="form-select" id="providerSelect">
+                        <option value="supplier-a">深圳远达国际物流公司海外分公司</option>
+                        <option value="supplier-b">宁波迅捷港务代理海外分公司</option>
+                        <option value="supplier-c">上海宏盛清关代理有限公司海外部</option>
+                    </select>
+                </div>
+                <div class="form-item" style="margin-bottom:0;">
+                    <div class="form-item-label">服务类型</div>
+                    <div class="checkbox-group">
+                        <label class="checkbox-wrap"><input type="checkbox" id="chk-qg" name="serviceType" checked>
+                            清关服务</label>
+                        <label class="checkbox-wrap"><input type="checkbox" id="chk-tg" name="serviceType" checked>
+                            提柜服务</label>
+                        <label class="checkbox-wrap"><input type="checkbox" id="chk-cp" name="serviceType" checked>
+                            拆派服务</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closePushModal()">取消</button>
+                <button class="btn btn-primary" onclick="confirmPush()">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS 逻辑控制 -->
+    <script>
+        const secondaryNav = document.getElementById('secondaryNav');
+        const pageTitle = document.getElementById('pageTitle');
+        const subItems = document.querySelectorAll('.menu-sub-item');
+        const primaryItems = document.querySelectorAll('.nav-item');
+        const pushModal = document.getElementById('pushModal');
+
+        // ==== 页面路由与菜单 ====
+        function expandNav(element) {
+            primaryItems.forEach(i => i.classList.remove('active'));
+            if (element) element.classList.add('active');
+            secondaryNav.classList.remove('collapsed');
+        }
+
+        function toggleNav() {
+            secondaryNav.classList.toggle('collapsed');
+        }
+
+        function handleMenuClick(element) {
+            subItems.forEach(i => i.classList.remove('active'));
+            element.classList.add('active');
+
+            const title = element.getAttribute('data-title');
+            if (title) {
+                pageTitle.innerText = '配载业务 / ' + title;
+            }
+
+            const targetId = element.getAttribute('data-target');
+            if (targetId) {
+                document.querySelectorAll('.page-container').forEach(page => page.classList.remove('active'));
+                const targetPage = document.getElementById(targetId);
+                if (targetPage) targetPage.classList.add('active');
+            }
+            if (!secondaryNav.classList.contains('collapsed')) {
+                secondaryNav.classList.add('collapsed');
+            }
+        }
+
+        // ==== 详情页特定路由 ====
+        function openOrderDetail() {
+            // 切换到详情页面视图
+            document.querySelectorAll('.page-container').forEach(page => page.classList.remove('active'));
+            document.getElementById('page-order-detail').classList.add('active');
+            // 修改面包屑支持返回上一级
+            pageTitle.innerHTML = `<span style="cursor:pointer; color:#2d8cf0;" onclick="goBackToPostPort()">配载业务 / 港后服务</span> <span style="margin:0 4px; color:#999;">/</span> 订单详情`;
+        }
+
+        function goBackToPostPort() {
+            document.querySelectorAll('.page-container').forEach(page => page.classList.remove('active'));
+            document.getElementById('page-post-port').classList.add('active');
+            pageTitle.innerText = '配载业务 / 港后服务';
+        }
+
+        // ==== 第一页：推送操作 ====
+        function toggleAllChecks(source) {
+            const checkboxes = document.querySelectorAll('#fbxTable tbody .row-checkbox');
+            checkboxes.forEach(cb => cb.checked = source.checked);
+        }
+
+        function getSelectedRows() {
+            const rows = document.querySelectorAll('#fbxTable tbody tr');
+            const selected = [];
+            rows.forEach(row => {
+                const cb = row.querySelector('.row-checkbox');
+                if (cb && cb.checked) {
+                    selected.push({
+                        no: row.querySelector('.c-no').innerText,
+                        date: row.querySelector('.c-date').innerText,
+                        box: row.querySelector('.c-box').innerText
+                    });
+                }
+            });
+            return selected;
+        }
+
+        function openPushModal() {
+            if (getSelectedRows().length === 0) {
+                alert('请先在列表中勾选需要推送的数据！');
+                return;
+            }
+            pushModal.classList.add('active');
+        }
+
+        function closePushModal() {
+            pushModal.classList.remove('active');
+        }
+
+        let pushedPzNos = []; // 核心：维护已经被推送的主配载单号
+        let pushedOptionsMap = {}; // 记录每一个配载单号推送时所选的服务类型：{qg, tg, cp}
+
+        function confirmPush() {
+            const selected = getSelectedRows();
+            const targetTbody = document.querySelector('#postPortTableTop tbody');
+            const emptyHint = document.getElementById('emptyTop');
+
+            if (emptyHint) emptyHint.remove();
+
+            // 获取推送时打勾的数据
+            const qg = document.getElementById('chk-qg').checked;
+            const tg = document.getElementById('chk-tg').checked;
+            const cp = document.getElementById('chk-cp').checked;
+
+            let hasNewPush = false;
+
+            selected.forEach(data => {
+                // 判断是否已经存在相同的推单
+                if (!document.getElementById('post_row_' + data.no)) {
+                    const tr = document.createElement('tr');
+                    tr.id = 'post_row_' + data.no;
+                    tr.className = 'selectable-row';
+                    tr.onclick = function () {
+                        selectPostPortRow(this, data.no);
+                    };
+                    tr.innerHTML = `
+                        <td>${data.no}</td>
+                        <td>${data.date}</td>
+                        <td>${data.box}</td>
+                        <td><button class="btn-link" onclick="openPzDetail('${data.no}'); event.stopPropagation();">详情</button></td>
+                    `;
+                    targetTbody.appendChild(tr);
+
+                    // 记录到全局推送名单及选项映射
+                    pushedPzNos.push(data.no);
+                    pushedOptionsMap[data.no] = { qg, tg, cp };
+                    hasNewPush = true;
+                }
+            });
+
+            alert(`成功推送 ${selected.length} 条记录至港后服务！`);
+            closePushModal();
+
+            document.getElementById('checkAllFbx').checked = false;
+            document.querySelectorAll('#fbxTable tbody .row-checkbox').forEach(cb => cb.checked = false);
+
+            if (hasNewPush) {
+                clearPzFilter();
+            }
+        }
+
+        // ====== 配载单（图二页面）详情调度 ======
+        function openPzDetail(pzNo) {
+            document.querySelectorAll('.page-container').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-pz-detail').classList.add('active');
+            pageTitle.innerHTML = `<span style="cursor:pointer; color:#2d8cf0;" onclick="goBackToPostPort()">配载业务 / 港后服务</span> <span style="margin:0 4px; color:#999;">/</span> 配载单详情（${pzNo}）`;
+
+            // 根据推送时的记录决定该详情页的复选框亮起状态和TAB的隐藏状态
+            const conf = pushedOptionsMap[pzNo] || { qg: false, tg: false, cp: false };
+
+            document.getElementById('disp-qg').checked = conf.qg;
+            document.getElementById('disp-tg').checked = conf.tg;
+            document.getElementById('disp-cp').checked = conf.cp;
+
+            document.getElementById('disp-qg').parentElement.style.display = 'flex';
+            document.getElementById('disp-tg').parentElement.style.display = 'flex';
+            document.getElementById('disp-cp').parentElement.style.display = 'flex';
+
+            // 控制拖车TAB的显示/隐藏: "当勾选了提柜服务时，拖车TAB才显示"
+            document.getElementById('tab-truck').style.display = conf.tg ? 'inline-block' : 'none';
+
+            // 将对应的子定单渲染进            // 动态控制内容
+            const pzSubTbody = document.getElementById('pzSubOrdersTbody');
+            pzSubTbody.innerHTML = '';
+
+            const myOrders = mockOrders.filter(o => o.pzNo === pzNo);
+            if (myOrders.length === 0) {
+                pzSubTbody.innerHTML = `<tr><td colspan="13" class="empty-data" style="white-space: nowrap;">暂无数据</td></tr>`;
+            } else {
+                myOrders.forEach((o, index) => {
+                    pzSubTbody.innerHTML += `<tr>
+                        <td>${index + 1}</td>
+                        <td>${o.orderNo}</td>
+                        <td>${o.date}</td>
+                        <td>${o.container}</td>
+                        <td>${o.channel}</td>
+                        <td>${o.channelTime}</td>
+                        <td>${o.daysSinceDep}</td>
+                        <td style="color:${o.isHold === '是' ? 'red' : 'inherit'}">${o.isHold}</td>
+                        <td>${o.addrType}</td>
+                        <td>${o.warehouse || '-'}</td>
+                        <td>${o.dispatchType}</td>
+                        <td>${o.address}</td>
+                        <td>${o.status}</td>
+                    </tr>`;
+                });
+            }
+
+            // 每次打开默认跳转到 basic Tab
+            switchPzTab('basic');
+        }
+
+        function switchPzTab(target) {
+            const tabs = document.querySelectorAll('#page-pz-detail .tabs-bar .tab-item');
+            tabs.forEach(t => t.classList.remove('active'));
+
+            document.getElementById('pz-tab-basic').style.display = 'none';
+            document.getElementById('pz-tab-orders').style.display = 'none';
+            document.getElementById('pz-tab-truck').style.display = 'none';
+            document.getElementById('pz-tab-others').style.display = 'none';
+
+            if (target === 'basic' || target === 'orders' || target === 'truck') {
+                document.getElementById('pz-tab-' + target).style.display = 'block';
+                tabs.forEach(t => {
+                    if (t.getAttribute('onclick').includes(target)) t.classList.add('active');
+                });
+            } else {
+                document.getElementById('pz-tab-others').style.display = 'block';
+                document.getElementById('pz-tab-others').innerText = '该模块 [' + target + '] 前端界面加载中...';
+                tabs.forEach(t => {
+                    if (t.getAttribute('onclick').includes(target)) t.classList.add('active');
+                });
+            }
+        }
+
+        function toggleTruckTab() {
+            const isChecked = document.getElementById('disp-tg').checked;
+            document.getElementById('tab-truck').style.display = isChecked ? 'inline-block' : 'none';
+            // 如果处于拖车视图中被取消，则回退到基本信息
+            if (!isChecked && document.getElementById('pz-tab-truck').style.display !== 'none') {
+                switchPzTab('basic');
+            }
+        }
+
+        // ==== 第二页：联动与查询逻辑 ====
+
+        // 伪造的这三个配载单对应的各 3 个下属订舱工作单
+        const mockOrders = [
+            { pzNo: 'PZ202604160001', orderNo: 'ORD260416-001', date: '2026-04-16', container: 'TLLU4189032', channel: '海运双清', channelTime: '30天', daysSinceDep: '18天', isHold: '否', addrType: 'FBA', warehouse: 'LAX9', dispatchType: '卡派', address: '123 Amazon Dr, LA', status: '待签收' },
+            { pzNo: 'PZ202604160001', orderNo: 'ORD260416-002', date: '2026-04-16', container: 'TLLU4189032', channel: '海运自税', channelTime: '25天', daysSinceDep: '20天', isHold: '是', addrType: 'FBX', warehouse: 'FBX-NY', dispatchType: '快递派', address: '45 FBX Center, NY', status: '待签收' },
+            { pzNo: 'PZ202604160001', orderNo: 'ORD260416-003', date: '2026-04-16', container: 'TLLU4189032', channel: '空运直送', channelTime: '7-10天', daysSinceDep: '5天', isHold: '否', addrType: '私人地址', warehouse: '', dispatchType: '快递派', address: '789 Sunset Blvd', status: '已签收' },
+
+            { pzNo: 'PZ202604160002', orderNo: 'ORD260415-001', date: '2026-04-15', container: 'CAIU2837190', channel: '国际快递', channelTime: '3-5天', daysSinceDep: '3天', isHold: '否', addrType: '商业地址', warehouse: '', dispatchType: '卡派', address: '101 Business Pkwy', status: '待签收' },
+            { pzNo: 'PZ202604160002', orderNo: 'ORD260415-002', date: '2026-04-15', container: 'CAIU2837190', channel: '海运拼箱', channelTime: '35天', daysSinceDep: '15天', isHold: '是', addrType: '客户自提', warehouse: '', dispatchType: '自提', address: '自提点A区', status: '待签收' },
+            { pzNo: 'PZ202604160002', orderNo: 'ORD260415-003', date: '2026-04-15', container: 'CAIU2837190', channel: '海运双清', channelTime: '28天', daysSinceDep: '14天', isHold: '否', addrType: 'FBA', warehouse: 'ONT8', dispatchType: '卡派', address: '2000 Ontario St', status: '已签收' },
+
+            { pzNo: 'PZ202604160003', orderNo: 'ORD260414-001', date: '2026-04-14', container: 'MSCU2845612', channel: '海运自税', channelTime: '26天', daysSinceDep: '26天', isHold: '否', addrType: 'FBX', warehouse: 'FBX-LA', dispatchType: '卡派', address: '80 FBX Way', status: '待签收' },
+            { pzNo: 'PZ202604160003', orderNo: 'ORD260414-002', date: '2026-04-14', container: 'MSCU2845612', channel: '空运直送', channelTime: '8天', daysSinceDep: '2天', isHold: '否', addrType: '商业地址', warehouse: '', dispatchType: '快递派', address: '300 Corporate Dr', status: '待签收' },
+            { pzNo: 'PZ202604160003', orderNo: 'ORD260414-003', date: '2026-04-14', container: 'MSCU2845612', channel: '国际快递', channelTime: '5天', daysSinceDep: '1天', isHold: '是', addrType: '私人地址', warehouse: '', dispatchType: '快递派', address: '55 Home Ave', status: '已签收' }
+        ];
+
+        let activePzFilter = null;
+        let activeStatusFilter = null;
+
+        let subOrderFilters = {
+            orderNo: '',
+            dateStart: '',
+            dateEnd: '',
+            channel: '',
+            addrType: '',
+            dispatch: ''
+        };
+
+        // 渲染订单
+        function renderOrders() {
+            const tbody = document.getElementById('ordersTbody');
+            tbody.innerHTML = ''; // 清空
+
+            const checkAll = document.getElementById('checkAllOrders');
+            if (checkAll) checkAll.checked = false;
+
+            // 拦截：如果没有推送过任何数据，底部应该完全展示空。
+            if (pushedPzNos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="15" class="empty-data" style="white-space: nowrap;">暂无关联的工作单数据</td></tr>`;
+                return;
+            }
+
+            // 获取全部具有推送资格的数据
+            let targetData = mockOrders.filter(o => pushedPzNos.includes(o.pzNo));
+
+            // 如果有特定的过滤条件（当用户在上部表格点击了某特定一行时）则进一步过滤
+            if (activePzFilter) {
+                targetData = targetData.filter(o => o.pzNo === activePzFilter);
+            }
+            if (activeStatusFilter) {
+                targetData = targetData.filter(o => o.status === activeStatusFilter);
+            }
+
+            // 新增复杂过滤条件判断
+            if (subOrderFilters.orderNo) {
+                targetData = targetData.filter(o => o.orderNo.includes(subOrderFilters.orderNo));
+            }
+            if (subOrderFilters.dateStart) {
+                targetData = targetData.filter(o => o.date >= subOrderFilters.dateStart);
+            }
+            if (subOrderFilters.dateEnd) {
+                targetData = targetData.filter(o => o.date <= subOrderFilters.dateEnd);
+            }
+            if (subOrderFilters.channel) {
+                targetData = targetData.filter(o => o.channel === subOrderFilters.channel);
+            }
+            if (subOrderFilters.addrType) {
+                targetData = targetData.filter(o => o.addrType === subOrderFilters.addrType);
+            }
+            if (subOrderFilters.dispatch) {
+                targetData = targetData.filter(o => o.dispatchType === subOrderFilters.dispatch);
+            }
+
+            if (targetData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="15" class="empty-data" style="white-space: nowrap;">未找到符合条件的关联记录</td></tr>`;
+                return;
+            }
+
+            targetData.forEach((o, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="checkbox" class="order-cb" value="${o.orderNo}"></td>
+                    <td>${index + 1}</td>
+                    <td>${o.orderNo}</td>
+                    <td>${o.date}</td>
+                    <td>${o.container}</td>
+                    <td>${o.channel}</td>
+                    <td>${o.channelTime}</td>
+                    <td>${o.daysSinceDep}</td>
+                    <td style="color:${o.isHold === '是' ? 'red' : 'inherit'}">${o.isHold}</td>
+                    <td>${o.addrType}</td>
+                    <td>${o.warehouse || '-'}</td>
+                    <td>${o.dispatchType}</td>
+                    <td>${o.address}</td>
+                    <td>${o.status}</td>
+                    <td><button class="btn-link" onclick="openOrderDetail()">详情</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // 单独处理批量签收按钮的显隐：在已签收状态下隐藏
+            const batchContainer = document.getElementById('batchSignOffContainer');
+            if (batchContainer) {
+                batchContainer.style.display = (activeStatusFilter === '已签收') ? 'none' : 'flex';
+            }
+        }
+
+        function toggleAllOrders(checkbox) {
+            document.querySelectorAll('#ordersTbody .order-cb').forEach(cb => {
+                cb.checked = checkbox.checked;
+            });
+        }
+
+        // 选中上面的某条配载单行，高亮自身，同时筛下面的记录
+        function selectPostPortRow(trElement, pzNo) {
+            document.querySelectorAll('#postPortTableTop tbody tr').forEach(row => {
+                row.classList.remove('selected');
+            });
+            trElement.classList.add('selected');
+
+            activePzFilter = pzNo;
+            const hint = document.getElementById('currentPzFilter');
+            hint.style.display = 'flex';
+            document.getElementById('currentPzName').innerText = pzNo;
+
+            // 联动重绘下方表格
+            renderOrders();
+        }
+
+        function switchOrdersTab(element, statusCondition) {
+            // 获取当前父级所有 tab 去除 active
+            const allTabs = element.parentElement.querySelectorAll('.tab-item');
+            allTabs.forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+
+            activeStatusFilter = statusCondition;
+            renderOrders();
+        }
+
+        function clearPzFilter() {
+            document.querySelectorAll('#postPortTableTop tbody tr').forEach(row => {
+                row.classList.remove('selected');
+            });
+            document.getElementById('currentPzFilter').style.display = 'none';
+            activePzFilter = null;
+            renderOrders();
+        }
+
+        function applySubFilters() {
+            subOrderFilters.orderNo = document.getElementById('subFilterOrderNo').value.trim();
+            subOrderFilters.dateStart = document.getElementById('subFilterDateStart').value;
+            subOrderFilters.dateEnd = document.getElementById('subFilterDateEnd').value;
+            subOrderFilters.channel = document.getElementById('subFilterChannel').value;
+            subOrderFilters.addrType = document.getElementById('subFilterAddrType').value;
+            subOrderFilters.dispatch = document.getElementById('subFilterDispatch').value;
+            renderOrders();
+        }
+
+        function resetSubFilters() {
+            document.getElementById('subFilterOrderNo').value = '';
+            document.getElementById('subFilterDateStart').value = '';
+            document.getElementById('subFilterDateEnd').value = '';
+            document.getElementById('subFilterChannel').value = '';
+            document.getElementById('subFilterAddrType').value = '';
+            document.getElementById('subFilterDispatch').value = '';
+            applySubFilters();
+        }
+
+        function batchSignOff() {
+            const checkedBoxes = document.querySelectorAll('#ordersTbody .order-cb:checked');
+            if (checkedBoxes.length === 0) {
+                alert('请先勾选需要签收的工作单！');
+                return;
+            }
+            let successCount = 0;
+            checkedBoxes.forEach(cb => {
+                const orderNo = cb.value;
+                const match = mockOrders.find(o => o.orderNo === orderNo);
+                if (match && match.status !== '已签收') {
+                    match.status = '已签收';
+                    successCount++;
+                }
+            });
+            if (successCount > 0) {
+                alert(`成功批量签收 ${successCount} 条记录！`);
+                // 让列表自动保持刚才的过滤状态重绘
+                renderOrders();
+            } else {
+                alert('所选记录已经处于已签收状态。');
+            }
+        }
+    </script>
+</body>
+
+</html>
