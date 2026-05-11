@@ -1298,10 +1298,22 @@
         <!-- ======================= 页面四：主配载详细 (图二图三衍生) ======================= -->
         <div id="page-pz-detail" class="page-container" style="background:#fff;">
             <!-- 复杂的Tabs区域 -->
-            <div class="tabs-bar" style="border-bottom: 2px solid #2d8cf0; padding-top:8px;">
-                <div class="tab-item active" onclick="switchPzTab('basic')">基本信息</div>
-                <div class="tab-item" onclick="switchPzTab('orders')">配载订单</div>
-                <div class="tab-item" id="tab-truck" onclick="switchPzTab('truck')" style="display:none;">拖车</div>
+            <div class="tabs-bar" style="border-bottom: 2px solid #2d8cf0; padding-top:8px; display: flex; justify-content: space-between; align-items: flex-end;">
+                <div style="display: flex;">
+                    <div class="tab-item active" onclick="switchPzTab('basic')">基本信息</div>
+                    <div class="tab-item" onclick="switchPzTab('orders')">配载订单</div>
+                    <div class="tab-item" id="tab-truck" onclick="switchPzTab('truck')" style="display:none;">拖车</div>
+                    <div class="tab-item" onclick="switchPzTab('fee')">费用</div>
+                </div>
+                <div style="display: flex; gap: 8px; margin-bottom: 4px; margin-right: 16px;">
+                    <button class="btn btn-default" style="padding: 4px 12px; min-width:auto; height: 32px;"><i class="ph ph-caret-left"></i></button>
+                    <button class="btn btn-default" style="padding: 4px 12px; min-width:auto; height: 32px;"><i class="ph ph-caret-right"></i></button>
+                    <button class="btn btn-primary" style="height: 32px; line-height: 1;">保存</button>
+                    <button class="btn btn-default" style="height: 32px; line-height: 1;">取消</button>
+                    <button class="btn btn-default" style="height: 32px; line-height: 1;">单证</button>
+                    <button class="btn btn-default" style="height: 32px; line-height: 1;">完结</button>
+                    <button class="btn btn-default" style="height: 32px; line-height: 1;" onclick="goBackToPostPort()">返回</button>
+                </div>
             </div>
 
             <!-- 基本信息 Content -->
@@ -1684,8 +1696,156 @@
                 </div>
             </div>
 
-            <!-- 其他留空 -->
-            <div id="pz-tab-others" style="display:none; padding:40px; text-align:center; color:#999;">页面内容开发中...</div>
+            <!-- 费用 Content -->
+            <div id="pz-tab-fee" style="display:none; padding: 16px; background:#f5f7fa;">
+                <!-- 顶部统计栏 -->
+                <div
+                    style="display:flex; justify-content:flex-end; align-items:center; background:#fff; padding:8px 16px; border:1px solid #ebedf0; border-bottom:none; font-size:12px; gap:16px;">
+                    <div>PCS: </div>
+                    <div>KGS: </div>
+                    <div>CBM: </div>
+                    <div>CTN: <span style="font-weight:500;">1*40HQ</span></div>
+                    <div>毛利率 <span style="color:#ed4014;">0%</span></div>
+                    <div>折合币制 <select style="border:1px solid #dcdee2; padding:2px; font-size:12px; border-radius:2px;">
+                            <option>CNY</option>
+                        </select></div>
+                    <div>订单应收 <span style="font-weight:600;">0.00</span></div>
+                    <div>订单应付 <span style="font-weight:600;">0.00</span></div>
+                    <div>应收 <span style="font-weight:600;">0.00</span></div>
+                    <div>应付 <span style="font-weight:600;">0.00</span></div>
+                    <div>毛利 <span style="font-weight:600;">0.00</span></div>
+                    <div>其它费用 <span style="font-weight:600;">0.00</span></div>
+                </div>
+
+                <!-- 应收表格块 -->
+                <div style="background:#fff; border:1px solid #ebedf0; margin-bottom:16px;">
+                    <div class="toolbar-area"
+                        style="border-bottom:1px solid #e8eaec; justify-content: flex-start; gap: 16px;">
+                        <div class="filter-group" style="display:flex; align-items:center; gap:16px;">
+                            <label class="checkbox-wrap"><input type="radio" name="ar-status" checked> 应收</label>
+                            <label class="checkbox-wrap"><input type="checkbox"> 完成应收</label>
+                        </div>
+                        <div class="actions-group" style="display:flex; align-items:center; gap:8px;">
+                            <button class="btn btn-default" style="color:#2d8cf0; border-color:#2d8cf0;"><i
+                                    class="ph ph-plus"></i> 新增</button>
+                            <button class="btn btn-default">复制到应收</button>
+                            <button class="btn btn-default">生成账单</button>
+                            <button class="btn btn-default">批量修改</button>
+                            <button class="btn btn-default">批量删除</button>
+                            <button class="btn btn-default">批量分摊</button>
+                            <button class="btn btn-default">长分摊账单</button>
+                            <button class="btn btn-default">费用模板</button>
+                        </div>
+                    </div>
+                    <div class="table-container" style="padding-top:0;">
+                        <table style="width: 100%; white-space:nowrap;">
+                            <thead>
+                                <tr>
+                                    <th width="40"><input type="checkbox"></th>
+                                    <th>类别</th>
+                                    <th>结算公司代码</th>
+                                    <th>结算公司</th>
+                                    <th>费用代码</th>
+                                    <th>费用</th>
+                                    <th>单价</th>
+                                    <th>计价单位</th>
+                                    <th>数量</th>
+                                    <th>单位</th>
+                                    <th>金额</th>
+                                    <th>税率</th>
+                                    <th>税金</th>
+                                    <th>不含税金额</th>
+                                    <th>币制</th>
+                                    <th>汇率</th>
+                                    <th>折算异</th>
+                                    <th>汇本币额</th>
+                                    <th>汇本币未核型</th>
+                                    <th>备注</th>
+                                    <th>凭证</th>
+                                    <th>参考号</th>
+                                    <th>操作 <i class="ph ph-gear"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="23">
+                                        <div class="empty-data"><i class="ph ph-magnifying-glass empty-icon"></i>
+                                            <div>暂无数据</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 应付表格块 -->
+                <div style="background:#fff; border:1px solid #ebedf0;">
+                    <div class="toolbar-area"
+                        style="border-bottom:1px solid #e8eaec; justify-content: flex-start; gap: 16px;">
+                        <div class="filter-group" style="display:flex; align-items:center; gap:16px;">
+                            <label class="checkbox-wrap"><input type="radio" name="ap-status" checked> 应付</label>
+                            <label class="checkbox-wrap"><input type="checkbox"> 完成应付</label>
+                        </div>
+                        <div class="actions-group" style="display:flex; align-items:center; gap:8px;">
+                            <button class="btn btn-default" style="color:#2d8cf0; border-color:#2d8cf0;"><i
+                                    class="ph ph-plus"></i> 新增</button>
+                            <button class="btn btn-default">复制费用</button>
+                            <button class="btn btn-default">生成账单</button>
+                            <button class="btn btn-default">付款申请</button>
+                            <button class="btn btn-default">批量修改</button>
+                            <button class="btn btn-default">批量删除</button>
+                            <button class="btn btn-default">批量分摊</button>
+                            <button class="btn btn-default">参数应用</button>
+                            <button class="btn btn-default">费用模板</button>
+                        </div>
+                    </div>
+                    <div class="table-container" style="padding-top:0;">
+                        <table style="width: 100%; white-space:nowrap;">
+                            <thead>
+                                <tr>
+                                    <th width="40"><input type="checkbox"></th>
+                                    <th>类别</th>
+                                    <th>计费日期</th>
+                                    <th>结算公司代码</th>
+                                    <th>结算公司</th>
+                                    <th>费用代码</th>
+                                    <th>费用</th>
+                                    <th>单价</th>
+                                    <th>单价含税</th>
+                                    <th>数量</th>
+                                    <th>单位</th>
+                                    <th>金额</th>
+                                    <th>税率</th>
+                                    <th>税金</th>
+                                    <th>不含税金额</th>
+                                    <th>币制</th>
+                                    <th>汇率</th>
+                                    <th>折算异</th>
+                                    <th>汇本币额</th>
+                                    <th>汇本币未核型</th>
+                                    <th>备注</th>
+                                    <th>P/C</th>
+                                    <th>参考号</th>
+                                    <th>操作 <i class="ph ph-gear"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="24">
+                                        <div class="empty-data"><i class="ph ph-magnifying-glass empty-icon"></i>
+                                            <div>暂无数据</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 其他（占位） -->
+            <div id="pz-tab-others" style="display:none; padding:16px; text-align:center; color:#999;">页面内容开发中...</div>
         </div>
 
     </main>
@@ -1924,9 +2084,10 @@
             document.getElementById('pz-tab-basic').style.display = 'none';
             document.getElementById('pz-tab-orders').style.display = 'none';
             document.getElementById('pz-tab-truck').style.display = 'none';
+            document.getElementById('pz-tab-fee').style.display = 'none';
             document.getElementById('pz-tab-others').style.display = 'none';
 
-            if (target === 'basic' || target === 'orders' || target === 'truck') {
+            if (target === 'basic' || target === 'orders' || target === 'truck' || target === 'fee') {
                 document.getElementById('pz-tab-' + target).style.display = 'block';
                 tabs.forEach(t => {
                     if (t.getAttribute('onclick').includes(target)) t.classList.add('active');
