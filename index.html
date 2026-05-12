@@ -1304,14 +1304,13 @@
                     <div class="tab-item" onclick="switchPzTab('orders')">配载订单</div>
                     <div class="tab-item" id="tab-truck" onclick="switchPzTab('truck')" style="display:none;">拖车</div>
                     <div class="tab-item" onclick="switchPzTab('fee')">费用</div>
+                    <div class="tab-item" onclick="switchPzTab('mbl')">MBL</div>
                 </div>
                 <div style="display: flex; gap: 8px; margin-bottom: 4px; margin-right: 16px;">
                     <button class="btn btn-default" style="padding: 4px 12px; min-width:auto; height: 32px;"><i class="ph ph-caret-left"></i></button>
                     <button class="btn btn-default" style="padding: 4px 12px; min-width:auto; height: 32px;"><i class="ph ph-caret-right"></i></button>
                     <button class="btn btn-primary" style="height: 32px; line-height: 1;">保存</button>
-                    <button class="btn btn-default" style="height: 32px; line-height: 1;">取消</button>
                     <button class="btn btn-default" style="height: 32px; line-height: 1;">单证</button>
-                    <button class="btn btn-default" style="height: 32px; line-height: 1;">完结</button>
                     <button class="btn btn-default" style="height: 32px; line-height: 1;" onclick="goBackToPostPort()">返回</button>
                 </div>
             </div>
@@ -1324,11 +1323,11 @@
                             基本信息
                             <div class="section-tabs" style="margin: 0 16px;">
                                 <label class="checkbox-wrap" style="margin-right:8px;"><input type="checkbox"
-                                        id="disp-qg" checked> 清关服务</label>
+                                        id="disp-qg" checked onchange="toggleQgSection()"> 清关服务</label>
                                 <label class="checkbox-wrap" style="margin-right:8px;"><input type="checkbox"
                                         id="disp-tg" checked onchange="toggleTruckTab()"> 提柜服务</label>
                                 <label class="checkbox-wrap" style="margin-right:8px;"><input type="checkbox"
-                                        id="disp-cp" checked> 拆派服务</label>
+                                        id="disp-cp" checked onchange="toggleCpSection()"> 拆派服务</label>
                             </div>
                         </div>
                     </div>
@@ -1399,7 +1398,6 @@
                                 </select>
                             </div>
                         </div>
-
                         <div class="grid-item"><span class="grid-label">货物类别</span>
                             <div class="grid-control"><input type="text" class="form-control" disabled value="普货"></div>
                         </div>
@@ -1415,76 +1413,52 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="detail-section" style="margin:0 0 16px 0;">
-                    <div class="section-header">船期信息 <span
-                            style="background:#2d8cf0; color:#fff; font-size:10px; padding:2px 6px; border-radius:2px; margin-left:8px;">SO智能识别</span>
-                    </div>
+                    <div class="section-header">船期信息</div>
                     <div class="form-grid grid-4col">
-                        <div class="grid-item"><span class="grid-label">订舱号</span>
-                            <div class="grid-control"><input type="text" class="form-control" disabled
-                                    value="BK2024581">
-                            </div>
-                        </div>
-                        <div class="grid-item"><span class="grid-label">收货地</span>
-                            <div class="grid-control"><input type="text" class="form-control" disabled value="SHENZHEN">
-                            </div>
-                        </div>
-                        <div class="grid-item"><span class="grid-label">订舱日期</span>
-                            <div class="grid-control"><input type="text" class="form-control" disabled
-                                    value="2026-04-01">
-                            </div>
-                        </div>
-                        <div class="grid-item" style="grid-row: span 2;"><span class="grid-label">订舱备注</span>
-                            <div class="grid-control"><textarea class="full-textarea" disabled></textarea></div>
-                        </div>
-
-                        <div class="grid-item"><span class="grid-label">订舱代理</span>
-                            <div class="grid-control"><input type="text" class="form-control" disabled value="代理A">
-                            </div>
-                        </div>
-                        <div class="grid-item"><span class="grid-label">装港</span>
-                            <div class="grid-control"><input type="text" class="form-control" disabled value="YANTIAN">
-                            </div>
-                        </div>
-                        <div class="grid-item"><span class="grid-label">截关日</span>
-                            <div class="grid-control"><input type="text" class="form-control" disabled
-                                    value="2026-04-10">
-                            </div>
-                        </div>
-
-                        <div class="grid-item"><span class="grid-label">船名航次</span>
-                            <div class="grid-control"><input type="text" class="form-control" disabled
-                                    value="COSCO SHIPPING"></div>
-                        </div>
-                        <div class="grid-item"><span class="grid-label">目的港</span>
-                            <div class="grid-control"><input type="text" class="form-control" disabled
-                                    value="LOS ANGELES">
-                            </div>
-                        </div>
-                        <div class="grid-item"><span class="grid-label">截柜日</span>
-                            <div class="grid-control"><input type="text" class="form-control" disabled
-                                    value="2026-04-09">
-                            </div>
-                        </div>
-                        <div class="grid-item"><span class="grid-label">ETD</span>
-                            <div class="grid-control"><input type="text" class="form-control" disabled
-                                    value="2026-04-12">
-                            </div>
-                        </div>
-
+                        <!-- Row 1 -->
                         <div class="grid-item"><span class="grid-label">船公司</span>
                             <div class="grid-control"><input type="text" class="form-control" disabled value="COSCO">
                             </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">船名/航次</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="COSCO SHIPPING"></div>
                         </div>
                         <div class="grid-item"><span class="grid-label">柜号</span>
                             <div class="grid-control"><input type="text" class="form-control" disabled
                                     value="CXIU392817">
                             </div>
                         </div>
-                        <div class="grid-item"><span class="grid-label">截VGM</span>
+                        <div class="grid-item"><span class="grid-label">箱型</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="40'HQ">
+                            </div>
+                        </div>
+
+                        <!-- Row 2 -->
+                        <div class="grid-item"><span class="grid-label">收货地</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="SHENZHEN">
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">装港</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="YANTIAN">
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">目的港</span>
                             <div class="grid-control"><input type="text" class="form-control" disabled
-                                    value="2026-04-09">
+                                    value="LOS ANGELES">
+                            </div>
+                        </div>
+                        <div class="grid-item" style="gap:12px;">
+                            <span class="grid-label">放货方式</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="电放"></div>
+                            <label class="checkbox-wrap"><input type="checkbox" disabled> 电放背书</label>
+                        </div>
+
+                        <!-- Row 3 -->
+                        <div class="grid-item"><span class="grid-label">ETD</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled
+                                    value="2026-04-12">
                             </div>
                         </div>
                         <div class="grid-item"><span class="grid-label">ETA</span>
@@ -1492,43 +1466,26 @@
                                     value="2026-04-26">
                             </div>
                         </div>
-
-                        <div class="grid-item"><span class="grid-label">合约号</span>
-                            <div class="grid-control"><input type="text" class="form-control" disabled value="CT553311">
-                            </div>
-                        </div>
-                        <div class="grid-item"><span class="grid-label">箱型</span>
-                            <div class="grid-control"><input type="text" class="form-control" disabled value="40'HQ">
-                            </div>
-                        </div>
-                        <div class="grid-item"><span class="grid-label">截文件</span>
-                            <div class="grid-control"><input type="text" class="form-control" disabled
-                                    value="2026-04-08">
-                            </div>
-                        </div>
                         <div class="grid-item"><span class="grid-label">ATD</span>
-                            <div class="grid-control"><input type="text" class="form-control" disabled value=""></div>
-                        </div>
-
-                        <div class="grid-item" style="gap:12px;">
-                            <span class="grid-label">放货方式</span>
-                            <div class="grid-control"><input type="text" class="form-control" disabled value="电放"></div>
-                            <label class="checkbox-wrap"><input type="checkbox" disabled> 电放背书</label>
-                        </div>
-                        <div class="grid-item"><span class="grid-label">封条号</span>
-                            <div class="grid-control"><input type="text" class="form-control" disabled value="SEAL9833">
-                            </div>
-                        </div>
-                        <div class="grid-item"><span class="grid-label">Pin</span>
                             <div class="grid-control"><input type="text" class="form-control" disabled value=""></div>
                         </div>
                         <div class="grid-item"><span class="grid-label">ATA</span>
                             <div class="grid-control"><input type="text" class="form-control" disabled value=""></div>
                         </div>
+
+                        <!-- Row 4 -->
+                        <div class="grid-item"><span class="grid-label">合约号</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="CT553311">
+                            </div>
+                        </div>
+                        <div class="grid-item"><span class="grid-label">封条号</span>
+                            <div class="grid-control"><input type="text" class="form-control" disabled value="SEAL9833">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="detail-section" style="margin:0 0 16px 0;">
+                <div class="detail-section" id="section-qg" style="margin:0 0 16px 0;">
                     <div class="section-header">海关信息</div>
                     <div class="form-grid grid-4col">
                         <div class="grid-item"><span class="grid-label">清关代理</span>
@@ -1554,7 +1511,7 @@
                 </div>
 
                 <!-- 唯一处于可编辑状态的部分 -->
-                <div class="detail-section" style="margin:0 0 16px 0;">
+                <div class="detail-section" id="section-cp" style="margin:0 0 16px 0;">
                     <div class="section-header" style="color:#2d8cf0;">尾程服务 (部分可编辑)</div>
                     <div class="form-grid grid-4col">
                         <div class="grid-item"><span class="grid-label">供应商</span>
@@ -1844,8 +1801,10 @@
                 </div>
             </div>
 
-            <!-- 其他（占位） -->
-            <div id="pz-tab-others" style="display:none; padding:16px; text-align:center; color:#999;">页面内容开发中...</div>
+            <!-- MBL Tab 内容 -->
+            <div id="pz-tab-mbl" style="display:none; padding:16px;">
+                <img src="mbl_form.png" style="width:100%; border:1px solid #e8eaec; border-radius:4px; box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);">
+            </div>
         </div>
 
     </main>
@@ -2046,6 +2005,10 @@
             // 控制拖车TAB的显示/隐藏: "当勾选了提柜服务时，拖车TAB才显示"
             document.getElementById('tab-truck').style.display = conf.tg ? 'inline-block' : 'none';
 
+            // 控制海关信息和尾程信息的初始显示/隐藏
+            document.getElementById('section-qg').style.display = conf.qg ? 'block' : 'none';
+            document.getElementById('section-cp').style.display = conf.cp ? 'block' : 'none';
+
             // 将对应的子定单渲染进            // 动态控制内容
             const pzSubTbody = document.getElementById('pzSubOrdersTbody');
             pzSubTbody.innerHTML = '';
@@ -2085,16 +2048,10 @@
             document.getElementById('pz-tab-orders').style.display = 'none';
             document.getElementById('pz-tab-truck').style.display = 'none';
             document.getElementById('pz-tab-fee').style.display = 'none';
-            document.getElementById('pz-tab-others').style.display = 'none';
+            document.getElementById('pz-tab-mbl').style.display = 'none';
 
-            if (target === 'basic' || target === 'orders' || target === 'truck' || target === 'fee') {
+            if (target === 'basic' || target === 'orders' || target === 'truck' || target === 'fee' || target === 'mbl') {
                 document.getElementById('pz-tab-' + target).style.display = 'block';
-                tabs.forEach(t => {
-                    if (t.getAttribute('onclick').includes(target)) t.classList.add('active');
-                });
-            } else {
-                document.getElementById('pz-tab-others').style.display = 'block';
-                document.getElementById('pz-tab-others').innerText = '该模块 [' + target + '] 前端界面加载中...';
                 tabs.forEach(t => {
                     if (t.getAttribute('onclick').includes(target)) t.classList.add('active');
                 });
@@ -2108,6 +2065,16 @@
             if (!isChecked && document.getElementById('pz-tab-truck').style.display !== 'none') {
                 switchPzTab('basic');
             }
+        }
+
+        function toggleQgSection() {
+            const isChecked = document.getElementById('disp-qg').checked;
+            document.getElementById('section-qg').style.display = isChecked ? 'block' : 'none';
+        }
+
+        function toggleCpSection() {
+            const isChecked = document.getElementById('disp-cp').checked;
+            document.getElementById('section-cp').style.display = isChecked ? 'block' : 'none';
         }
 
         // ==== 第二页：联动与查询逻辑 ====
